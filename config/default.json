@@ -1,0 +1,22 @@
+{
+
+    "app": {
+        "name": "5sep-Backend",
+        "host":"http://localhost:3030",
+        "port": 3030,
+        "jwtAlgo": "HS512",
+        "jwtKey": "5sepPBackend"
+       
+    },
+    "db": {
+        "name": "schoolERP",
+        "host": "localhost",
+         "port": 27017,
+         "mongoose": {
+            "useMongoClient": true,
+            "autoIndex": true,
+            "poolSize": 10,
+            "bufferMaxEntries": 0
+        }
+    }
+}
