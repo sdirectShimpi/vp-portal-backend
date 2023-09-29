@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema(
     },
 
 
+    content: {
+      type: String,
+       default: null
+    },
+
+
     
     projectDetails: {
       type: mongoose.Schema.Types.ObjectId,

@@ -20,6 +20,8 @@ const addData = await new projectPlan(payload)
 return addData.save()
 }
 
+
+
 exports.getProjectPlanData = async(payload)=>{
     const getData = await  projectPlan.find({isDeleted:false})
     if(!getData)
@@ -97,6 +99,13 @@ exports.updateProjectPlanData = async (id, payload, req) => {
         }
       }
     }
+
+
+
+
+
+
+
   const updatedData = await projectPlan.findByIdAndUpdate(
       { _id: id },
       payload,

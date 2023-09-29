@@ -29,7 +29,6 @@ const AddUser = async (req, res) => {
   }
 };
 
-
 const changePassword = async (req, res) => {
   let result;
   try {
@@ -57,9 +56,6 @@ const changePassword = async (req, res) => {
       .json(faildAction(statusCode.serverError, result, error.mesage));
   }
 };
-
-
-
 
 const LoginUser = async (req, res) => {
   let result;
@@ -89,10 +85,7 @@ const LoginUser = async (req, res) => {
   }
 };
 
-
-
-
-const VerifyOtp = async(req,res) =>  {
+const VerifyOtp = async (req, res) => {
   let result;
   try {
     result = await userServices.verifyOtp(req.body);
@@ -111,28 +104,19 @@ const VerifyOtp = async(req,res) =>  {
       return res
         .status(statusCode.unauthorized)
         .json(faildAction(statusCode.notallowed, result, message.otpExpire));
+    } else {
+      return res
+        .status(statusCode.success)
+        .json(successAction(result, message.loging));
     }
-else{
-    return res
-    .status(statusCode.success)
-    .json(successAction(result, message.loging));
-}
-    
-    
-  }
-  
-  
-  catch (error) {
+  } catch (error) {
     console.log(error);
 
     return res
       .status(statusCode.serverError)
       .json(faildAction(statusCode.serverError, result, error.mesage));
   }
-
-
-}
-
+};
 
 const UpdateUser = async (req, res) => {
   let result;
@@ -222,11 +206,10 @@ const searchUser = async (req, res) => {
   let result;
   try {
     result = await userServices.search(rq.query);
-   
-      return res
-        .status(statusCode.success)
-        .json(successAction(result, message.search));
-    
+
+    return res
+      .status(statusCode.success)
+      .json(successAction(result, message.search));
   } catch (error) {
     console.log(error);
 
@@ -259,6 +242,35 @@ const ResetPassword = async (req, res) => {
 };
 
 
+
+
+
+
+const ContentSend = async (req, res) => {
+  let result;
+
+  try {
+    result = await userServices.contentSend(req.body);
+
+    return res
+      .status(statusCode.success)
+      .json(successAction(result, message.ResetPassword));
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(statusCode.serverError)
+      .json(faildAction(statusCode.serverError, result, error.message));
+  }
+};
+
+
+
+
+
+
+
+
+
 module.exports = {
   AddUser,
   LoginUser,
@@ -269,5 +281,6 @@ module.exports = {
   VerifyOtp,
   changePassword,
   searchUser,
-  ResetPassword
+  ResetPassword,
+  ContentSend,
 };

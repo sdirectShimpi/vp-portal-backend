@@ -73,9 +73,13 @@ exports.addProjectData = async(payload) =>{
 
 
 exports.getDataById = async (id) => {
+    console.log("id",id)
+    // const id = userLogin._id;
+
     const data = await project.aggregate([
+        // { $match: { _id: new mongoose.Types.ObjectId(id) } },
        
-        { $match: { userDetails: new mongoose.Types.ObjectId(id) } },
+         { $match: { userDetails: new mongoose.Types.ObjectId(id) } },
         
         {
             $lookup: {

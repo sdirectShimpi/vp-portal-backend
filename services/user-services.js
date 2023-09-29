@@ -2,11 +2,13 @@
  *
  *
  */
+
 const user = require("../model/user-collection");
 const Bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const role = require("../model/role-plan-collection");
+const mongoose = require("mongoose");
 
 const fs = require("fs");
 const { fileUpload, generateToken } = require("../utilites/universal");
@@ -78,19 +80,25 @@ const generateOTP = () => {
 
 exports.loginUserWithUsernameAndPassword = async (payload) => {
   try {
-    const { email, password } = payload;
-    const userLogin = await user.findOne({ email });
+    const userLogin = await user.findOne({ email: payload.email });
 
     if (!userLogin) {
       return "invalidCredentials";
     }
-    const isPasswordValid = await Bcrypt.compare(password, userLogin.password);
+    const isPasswordValid = await Bcrypt.compare(
+      payload.password,
+      userLogin.password
+    );
 
     if (!isPasswordValid) {
       return "invalidCredentials";
     }
+    console.log("id", userLogin._id);
+
+    const id = userLogin._id;
 
     const userRecords = await user.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
       {
         $lookup: {
           from: "roles",
@@ -99,7 +107,7 @@ exports.loginUserWithUsernameAndPassword = async (payload) => {
           as: "role",
         },
       },
-       { $unwind: "$role" },
+      { $unwind: "$role" },
     ]);
 
     const loginToken = await generateToken({
@@ -115,8 +123,6 @@ exports.loginUserWithUsernameAndPassword = async (payload) => {
     throw error;
   }
 };
-
-
 
 // exports.loginUserWithOTP = async (payload) => {
 //   try {
@@ -229,6 +235,50 @@ exports.resetPassword = async (payload) => {
   }
 };
 
+
+
+exports.contentSend = async (payload) => {
+  console.log("payload", payload);
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "shimpiraj84094@gmail.com",
+        pass: "qmzygsiadpfgfzhb",
+      },
+    });
+
+    const htmlContent = Object.keys(payload)[0];
+
+    const mailOptions = {
+      from: "shimpiraj84094@gmail.com",
+      to: "shimpiraj29@gmail.com",
+      subject: "send Content",
+      html: htmlContent,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+      } else {
+        console.log("Email sent:", info.response);
+      }
+    });
+
+    return "Content email sent";
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
 exports.search = async (payload) => {
   try {
     const result = await user.find({
@@ -273,8 +323,13 @@ exports.verifyOtp = async (payload) => {
 
 
 
-exports.updateUser = async (id, payload, req) => {
 
+
+
+
+
+
+exports.updateUser = async (id, payload, req) => {
   const checkUserExists = await user.findOne({ _id: id, isDeleted: false });
   if (!checkUserExists) {
     return "noDataExist";
@@ -298,9 +353,6 @@ exports.updateUser = async (id, payload, req) => {
   }
 };
 
-
-
-
 exports.getUserRecord = async (payload) => {
   let result;
   const data = await user.find({ isDeleted: false });
@@ -318,21 +370,9 @@ exports.getUserDetails = async (id) => {
   if (!data) {
     return "noDataExist";
   } else {
-
-
-  
     return data;
-
-
-
-
-
-
   }
 };
-
-
-
 
 // exports.getUserDetails = async (id) => {
 //   const getData = await user.findOne({ _id: id, isDeleted: false });
@@ -341,7 +381,7 @@ exports.getUserDetails = async (id) => {
 //   }
 
 //   const productRecords = await user.aggregate([
-  
+
 //     {
 //       $lookup: {
 //         from: "projects",
@@ -355,11 +395,6 @@ exports.getUserDetails = async (id) => {
 
 //   return { getData, productRecords };
 // };
-
-
-
-
-
 
 exports.deleteUser = async (id) => {
   const userData = await user.findOne({ _id: id, isDeleted: false });

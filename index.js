@@ -21,6 +21,7 @@ const  resumeRouter = require('./router/resume-router')
 const productRouter = require('./router/project-router')
 const projectPlanRouter = require('./router/projectPlan-router')
 const RoleRouter = require('./router/role.router')
+const leaveRole = require('./router/leave-router')
 const cors = require('cors')
 
 
@@ -40,6 +41,7 @@ mongoose.connect(url).then(() => console.log("DB Connection Successfull"))
   console.error(err);
 });
 app.use(cors())
+app.use('/api/v1', leaveRole)
 app.use('/api/v1', resumeRouter)
 app.use('/api/v1',userRouter)
 app.use('/api/v1',productRouter)
