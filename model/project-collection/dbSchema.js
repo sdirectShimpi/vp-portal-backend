@@ -38,33 +38,28 @@ const projectSchema = new mongoose.Schema(
       default: null,
     },
     po: {
-      type: String,
-      default: null,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
     },
     scrumMaster: {
-      type: String,
-      default: null,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
     },
     team: [
       {
-        name: {
-          type: String,
-          default: null,
-        },
-        tech: {
-          type: String,
-          default: null,
-        },
-        shift: {
-          type: String,
-          default: null,
-        },
-        activeDays: {
-          type: Number,
-          default: null,
-        },
+        
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+  
       },
     ],
+
+
+
+    shift: {
+        type: String,
+         default: null,
+       },
     tech: {
       type: String,
       default: null,

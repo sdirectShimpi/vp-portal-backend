@@ -22,6 +22,7 @@ const productRouter = require('./router/project-router')
 const projectPlanRouter = require('./router/projectPlan-router')
 const RoleRouter = require('./router/role.router')
 const leaveRole = require('./router/leave-router')
+const taskRole = require('./router/task-router')
 const cors = require('cors')
 
 
@@ -47,6 +48,7 @@ app.use('/api/v1',userRouter)
 app.use('/api/v1',productRouter)
 app.use('/api/v1',projectPlanRouter)
 app.use('/api/v1',RoleRouter)
+app.use('/api/v1',taskRole)
 
 const server = http.createServer(app);
 

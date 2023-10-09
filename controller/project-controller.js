@@ -20,9 +20,10 @@ const  AddprojectData = async(req, res) => {
 const GetProductData = async(req,res) =>{
     let result
     result  = await projectServices.getData(req.body)
+    console.log("result",result)
     try
     {
-        if(result ==noDataExist )
+        if(result ===  'noDataExist' )
         {
             return res.status(statusCode.notfound).json(faildAction(statusCode.notfound ,result ,message.dataNotfound))
         }
@@ -40,6 +41,42 @@ const GetProductData = async(req,res) =>{
     }
 
 }
+
+
+const GetRecordById = async(req,res) =>{
+    let result
+    result  = await projectServices.getRecordUsingId(req.body)
+    console.log("result",result)
+    try
+    {
+        if(result ===  'noDataExist' )
+        {
+            return res.status(statusCode.notfound).json(faildAction(statusCode.notfound ,result ,message.dataNotfound))
+        }
+        else
+        {
+            return res.status(statusCode.success).json(faildAction(statusCode.success,result, message.getData))
+        }
+
+    }
+    catch(error)
+    {
+        console.log(error)
+        return res.status(statusCode.serverError).json(faildAction(statusCode.serverError, result, error.message))
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
 
 
 const GetProjectDetails = async (req, res) => {
@@ -101,4 +138,4 @@ const GetProjectDetails = async (req, res) => {
 
 
 
-module.exports = {AddprojectData,GetProductData,GetProjectDetails,DeleateRecord,UptadteData}
+module.exports =   { GetRecordById,AddprojectData,GetProductData,GetProjectDetails,DeleateRecord,UptadteData}

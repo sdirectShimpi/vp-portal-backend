@@ -27,14 +27,38 @@ exports.GetLeaves = async () => {
 //     }
 // };
 
+// exports.GetLeaveDetails = async (_id) => {
+//   console.log("id", _id);
+
+//   const data = await leave.aggregate([
+//     //{ $match: { _id: new mongoose.Types.ObjectId(_id) } },
+
+//      { $match: { userDetails: new mongoose.Types.ObjectId(_id) } },
+
+//     {
+//       $lookup: {
+//         from: "users",
+//         localField: "userDetails",
+//         foreignField: "_id",
+//         as: "user",
+//       },
+//     },
+//     { $unwind: "$user" },
+//   ]);
+
+//   if (data.length === 0) {
+//     return { message: "No data exists" };
+//   }
+
+//   return { data };
+// };
+
+
 exports.GetLeaveDetails = async (_id) => {
   console.log("id", _id);
 
   const data = await leave.aggregate([
-    //{ $match: { _id: new mongoose.Types.ObjectId(_id) } },
-
-     { $match: { userDetails: new mongoose.Types.ObjectId(_id) } },
-
+    { $match: { userDetails: new mongoose.Types.ObjectId(_id) } },
     {
       $lookup: {
         from: "users",
@@ -46,12 +70,31 @@ exports.GetLeaveDetails = async (_id) => {
     { $unwind: "$user" },
   ]);
 
+  console.log("Aggregation Result:", data);
+
   if (data.length === 0) {
+    console.log("No data exists for _id:", _id);
     return { message: "No data exists" };
   }
 
   return { data };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 exports.UpdateLeave = async (id, payload) => {
   let result;

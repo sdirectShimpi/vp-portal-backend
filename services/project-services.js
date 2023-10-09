@@ -7,65 +7,46 @@ exports.addProjectData = async(payload) =>{
     return addData.save()
 
 }
- exports.getData = async(payload)=>{
-    const getData = await  project.find({isDeleted:false})
-    if(!getData)
-    {
-        return "noDataExist"
+
+exports.getData = async (payload) => {
+    try {
+
+const getData = await project.find({isDeleted: false }); 
+        if (!getData) {
+            return "noDataExist";
+        } else {
+            return getData;
+        }
+    } catch (error) {
+        console.error(error);
+        throw error; // Handle errors appropriately in your route handler
     }
-    else{
-          return  getData
+};
 
+
+
+
+
+
+
+exports.getRecordUsingId = async (payload) => {
+    try {
+
+const getData = await project.find({$or:[{po:""},{scrumMaster:""},{team:""}],
+    isDeleted: false }); 
+        if (!getData) {
+            return "noDataExist";
+        } else {
+            return getData;
+        }
+    } catch (error) {
+        console.error(error);
+        throw error; 
     }
-
- }
-//  exports.getDataById = async (id) =>{
-//     const   getData = await project.findOne({_id:id, isDeleted:false})
-//     if(!getData)
-//     {
-//         return "noDataExist"
-//     }
-//     else
-//     {
-//         const userRecords = await Project.aggregate([
-//             {
-//               $lookup: {
-//                 from: "user",
-//                 localField: "userDetails",
-//                 foreignField: "_id",
-//                 as: "user",
-//               },
-//             },
-//              { $unwind: "$user" },
-//           ]);
-
-        
-//         return {getData,userRecords}
-//     }
-//  }
+};
 
 
-// exports.getDataById = async (id) => {
-//     // const getData = await project.findOne({ _id: id, isDeleted: false });
-//     // if (!getData) {
-//     //   return "noDataExist";
-//     // }
-  
-//     const getData = await project.aggregate([
-//      {$match : {userDetails : new mongoose.Types.ObjectId(id)}},
-//       {
-//         $lookup: {
-//           from: "users",
-//           localField: "userDetails",
-//           foreignField: "_id",
-//           as: "user",
-//         },
-//       },
-//       { $unwind: "$user" },
-//     ]);
-  
-//     return { getData, userRecords };
-//   };
+
 
 
 

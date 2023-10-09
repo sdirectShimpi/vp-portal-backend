@@ -9,9 +9,11 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const role = require("../model/role-plan-collection");
 const mongoose = require("mongoose");
+const leave = require("../model/Leave-mangement-collection")
 
 const fs = require("fs");
 const { fileUpload, generateToken } = require("../utilites/universal");
+const { constants } = require("fs/promises");
 
 exports.addUser = async (payload) => {
   const checkUser = await user.findOne({
@@ -26,9 +28,110 @@ exports.addUser = async (payload) => {
 
     const addData = new user(payload);
     console.log("addData,", addData);
-    return addData.save();
+    let savaData = await addData.save();
+    const userRole = savaData.userType
+
+
+    const roleId = await role.findOne({ userType: userRole, isDeleted: false }, { _id: 1 })
+    if (roleId) {
+      let payload = { roleType: roleId._id }
+      const updatedData = await user.findByIdAndUpdate({ _id: savaData._id }, { $set: { roleType: payload.roleType } })
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "shimpiraj84094@gmail.com",
+          pass: "qmzygsiadpfgfzhb",
+        },
+      });
+
+ let typeUser;
+
+  if (payload.userType === 2) {
+        typeUser = "Operator"
+      }
+  if (payload.userType === 3) {
+        typeUser = "PO"
+      }
+  if (payload.userType === 4) {
+        typeUser = "SM"
+      }
+
+ if (payload.userType === 5) {
+        typeUser = "Employee"
+      }
+     const mailOptions = {
+        from: "shimpiraj84094@gmail.com",
+        to: resetPassword.email,
+        subject: "Password Reset",
+        text: `Your new password is: ${typeUser}`,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+        } else {
+          console.log("Email sent:", info.response);
+        }
+      });
+
+    }
   }
 };
+
+
+
+
+exports.GetUserType = async () => {
+  try {
+    const data = await user.find({
+      $or: [
+        { userType: 3 },
+        { userType: 2 },
+        { userType: 5 }
+      ],
+      isDeleted: false
+    });
+
+    if (!data || data.length === 0) {
+      return 'noDataExit';
+    } else {
+      return data;
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    throw error;
+};
+}
+
+
+// exports.GetUserType = async () =>{
+//   let result;
+//   const  data = await user.find({
+//     $or:[
+//       {userType:3},
+//       {userType:2},
+//       {userType:5}
+//     ],
+//     isDeleted: false
+//   });
+//   if(!data)
+//   {
+//     return 'noDataEaxit'
+//   }
+//   else
+//   {
+//   result = data;
+//   }
+//    return result
+    
+
+// }
+
+
+
+
+
+
 
 exports.ChangePassword = async (payload, newPassword) => {
   try {
@@ -123,6 +226,12 @@ exports.loginUserWithUsernameAndPassword = async (payload) => {
     throw error;
   }
 };
+
+
+
+
+
+
 
 // exports.loginUserWithOTP = async (payload) => {
 //   try {
@@ -237,7 +346,9 @@ exports.resetPassword = async (payload) => {
 
 
 
-exports.contentSend = async (payload) => {
+
+
+exports.contentSend = async (payload, _id) => {
   console.log("payload", payload);
   try {
     const transporter = nodemailer.createTransport({
@@ -247,7 +358,6 @@ exports.contentSend = async (payload) => {
         pass: "qmzygsiadpfgfzhb",
       },
     });
-
     const htmlContent = Object.keys(payload)[0];
 
     const mailOptions = {
@@ -256,7 +366,20 @@ exports.contentSend = async (payload) => {
       subject: "send Content",
       html: htmlContent,
     };
-
+    /** */
+    const data = await leave.aggregate([
+      { $match: { userDetails: new mongoose.Types.ObjectId(_id) } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userDetails",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+    ]);
+    console.log("Aggregation Result:", data);
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending email:", error);
@@ -264,12 +387,19 @@ exports.contentSend = async (payload) => {
         console.log("Email sent:", info.response);
       }
     });
-
-    return "Content email sent";
+    return "Content email sent"
   } catch (error) {
     throw error;
   }
 };
+
+
+
+
+
+
+
+
 
 
 
@@ -366,6 +496,7 @@ exports.getUserRecord = async (payload) => {
 };
 
 exports.getUserDetails = async (id) => {
+
   const data = await user.findById({ _id: id, isDeleted: false });
   if (!data) {
     return "noDataExist";

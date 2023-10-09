@@ -241,6 +241,25 @@ const userSchema = new mongoose.Schema(
       type: String,
        default: null
     },
+    totalProject: {
+      type: String,
+      default: null,
+    },
+
+    totalExprince:{
+        type: String,
+      default: null,
+
+    },
+    activeProject:
+    {
+        type: String,
+        default: null,
+    },
+
+
+
+
     roleType:{
       type: mongoose.Schema.Types.ObjectId,
         ref: "role"

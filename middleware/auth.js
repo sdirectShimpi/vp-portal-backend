@@ -1,5 +1,6 @@
 const jwt =require('jsonwebtoken')
 const config = require('config')
+const user = require('../model/user-collection')
 const { message, statusCode } = require("../utilites/message");
 const { successAction, faildAction } = require("../utilites/response");
 const {generateToken} = require("../utilites/universal")
@@ -40,7 +41,7 @@ exports.checkToken = async (req, res, next) => {
             const decoded = await jwt.verify(token, jwtKey);
             
             const validationTime = new Date(Date.now())
-            if (auth && validationTime < new Date(auth.expiryTime)) {
+            if (user && validationTime < new Date(user.expiryTime)) {
                 req.user = { ...decoded, token };
                 next();
             } else {

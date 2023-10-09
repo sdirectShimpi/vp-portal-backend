@@ -160,6 +160,39 @@ const GetUserRecord = async (req, res) => {
   }
 };
 
+
+
+
+
+
+const GetUserTask = async (req, res) => {
+  let result;
+  try {
+    result = await userServices.GetUserType(req.body);
+    if (result === "noDataExist") {
+      return res
+        .status(statusCode.notfound)
+        .json(faildAction(statusCode.notfound, result, message.dataNotfound));
+    } else {
+      return res
+        .status(statusCode.success)
+        .json(successAction(result, message.getData));
+    }
+  } catch (error) {
+    return res
+      .status(statusCode.serverError)
+      .json(faildAction(statusCode.serverError, result, error.message));
+  }
+};
+
+
+
+
+
+
+
+
+
 const GetRecordDetails = async (req, res) => {
   let result;
   try {
@@ -283,4 +316,5 @@ module.exports = {
   searchUser,
   ResetPassword,
   ContentSend,
+  GetUserTask
 };

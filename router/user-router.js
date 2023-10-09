@@ -9,6 +9,7 @@ const ValidationMiddleware = require('../validater')
 
 
 router.post('/sendContent', userController.ContentSend)
+router.get('/getType', userController.GetUserTask)
 
 
 router.post('/creatUser', userController.AddUser)
