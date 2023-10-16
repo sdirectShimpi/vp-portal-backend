@@ -142,8 +142,10 @@ const UpdateUser = async (req, res) => {
 
 const GetUserRecord = async (req, res) => {
   let result;
+ 
   try {
-    result = await userServices.getUserRecord(req.body);
+    result = await userServices.getUserRecord(req.params);
+   
     if (result === "noDataExist") {
       return res
         .status(statusCode.notfound)

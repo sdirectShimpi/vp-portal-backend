@@ -36,6 +36,7 @@ exports.checkToken = async (req, res, next) => {
     try {
        
         let token = req.headers.authorization;
+     
         if (token) {
             token = token.replace("Bearer ", "")
             const decoded = await jwt.verify(token, jwtKey);

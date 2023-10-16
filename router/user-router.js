@@ -16,7 +16,7 @@ router.post('/creatUser', userController.AddUser)
 // router.post('/sendContent',userController.SendContent)
 
 router.post('/loginUser', (req, res, next)=> ValidationMiddleware(req, res, next, 'LogIn'),  userController.LoginUser)
-router.get('/getUserRecord',userController.GetUserRecord)
+router.get('/getUserRecord/:page', checkToken, userController.GetUserRecord)
 router.get('/getUser/:id',userController.GetRecordDetails)
 router.delete('/deletUserRecord/:id', checkToken, userController.DeleteUserDetials)
 router.put('/updateUser/:id', userController.UpdateUser)

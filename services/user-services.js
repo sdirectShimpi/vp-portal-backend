@@ -9,7 +9,8 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const role = require("../model/role-plan-collection");
 const mongoose = require("mongoose");
-const leave = require("../model/Leave-mangement-collection")
+const leave = require("../model/Leave-mangement-collection");
+const { addResume } = require("../services/resume-services");
 
 const fs = require("fs");
 const { fileUpload, generateToken } = require("../utilites/universal");
@@ -27,43 +28,51 @@ exports.addUser = async (payload) => {
     payload.password = Bcrypt.hashSync(payload.password, salt);
 
     const addData = new user(payload);
-    console.log("addData,", addData);
-    let savaData = await addData.save();
-    const userRole = savaData.userType
+    let savedData = await addData.save();
+    const userRole = savedData.userType;
+    const roleId = await role.findOne(
+      { userType: userRole, isDeleted: false },
+      { _id: 1 }
+    );
 
-
-    const roleId = await role.findOne({ userType: userRole, isDeleted: false }, { _id: 1 })
     if (roleId) {
-      let payload = { roleType: roleId._id }
-      const updatedData = await user.findByIdAndUpdate({ _id: savaData._id }, { $set: { roleType: payload.roleType } })
+      let payload = {
+        roleType: roleId._id,
+      };
+
+      const updatedData = await user.findByIdAndUpdate(
+        { _id: savedData._id },
+        { $set: { roleType: payload.roleType } },
+        { new: true }
+      );
+      //mail
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: "shimpiraj84094@gmail.com",
-          pass: "qmzygsiadpfgfzhb",
+          user: "shimpiraj29@gmail.com",
+          pass: "xluo ipcq xinr yeis",
         },
       });
 
- let typeUser;
+      let typeUser;
+      if (payload.userType === 2) {
+        typeUser = "Operator";
+      }
+      if (payload.userType === 3) {
+        typeUser = "PO";
+      }
+      if (payload.userType === 4) {
+        typeUser = "SM";
+      }
+      if (payload.userType === 5) {
+        typeUser = "Employee";
+      }
 
-  if (payload.userType === 2) {
-        typeUser = "Operator"
-      }
-  if (payload.userType === 3) {
-        typeUser = "PO"
-      }
-  if (payload.userType === 4) {
-        typeUser = "SM"
-      }
-
- if (payload.userType === 5) {
-        typeUser = "Employee"
-      }
-     const mailOptions = {
+      const mailOptions = {
         from: "shimpiraj84094@gmail.com",
-        to: resetPassword.email,
-        subject: "Password Reset",
-        text: `Your new password is: ${typeUser}`,
+        to: addData.email,
+        subject: "smartData VP-portal",
+        text: `Hello, user you have been successfully registered as an ${typeUser} on smartData VP-portal, your login creds are : username- ${addData.email}, password- ${addData.password}`,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
@@ -73,36 +82,31 @@ exports.addUser = async (payload) => {
           console.log("Email sent:", info.response);
         }
       });
-
+      savedData = updatedData;
     }
+
+    return savedData;
   }
 };
-
-
-
 
 exports.GetUserType = async () => {
   try {
     const data = await user.find({
-      $or: [
-        { userType: 3 },
-        { userType: 2 },
-        { userType: 5 }
-      ],
-      isDeleted: false
+      $or: [{ userType: 3 }, { userType: 4 }, { userType: 5 }],
+      isDeleted: false,
     });
+    console.log(data);
 
     if (!data || data.length === 0) {
-      return 'noDataExit';
+      return "noDataExit";
     } else {
       return data;
     }
   } catch (error) {
-    console.error('Error fetching user data:', error);
+    console.error("Error fetching user data:", error);
     throw error;
+  }
 };
-}
-
 
 // exports.GetUserType = async () =>{
 //   let result;
@@ -123,15 +127,8 @@ exports.GetUserType = async () => {
 //   result = data;
 //   }
 //    return result
-    
 
 // }
-
-
-
-
-
-
 
 exports.ChangePassword = async (payload, newPassword) => {
   try {
@@ -226,12 +223,6 @@ exports.loginUserWithUsernameAndPassword = async (payload) => {
     throw error;
   }
 };
-
-
-
-
-
-
 
 // exports.loginUserWithOTP = async (payload) => {
 //   try {
@@ -344,10 +335,6 @@ exports.resetPassword = async (payload) => {
   }
 };
 
-
-
-
-
 exports.contentSend = async (payload, _id) => {
   console.log("payload", payload);
   try {
@@ -387,27 +374,11 @@ exports.contentSend = async (payload, _id) => {
         console.log("Email sent:", info.response);
       }
     });
-    return "Content email sent"
+    return "Content email sent";
   } catch (error) {
     throw error;
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 exports.search = async (payload) => {
   try {
@@ -451,15 +422,10 @@ exports.verifyOtp = async (payload) => {
   }
 };
 
-
-
-
-
-
-
-
-
 exports.updateUser = async (id, payload, req) => {
+
+  console.log("id",id)
+
   const checkUserExists = await user.findOne({ _id: id, isDeleted: false });
   if (!checkUserExists) {
     return "noDataExist";
@@ -473,7 +439,26 @@ exports.updateUser = async (id, payload, req) => {
           payload.profileImage = fileData;
         }
       }
+      const resumeResult = await addResume(id ,req);
+
+      // if (req.files.resume) {
+      //   const resumePayload = {
+      //     userId: checkUserExists._id,
+      //     fileData: req.ResumeDoc.data,
+      //   };
+
+
+
+       
+        // if (
+        //   resumeResult === "invalidFileType" ||
+        //   resumeResult === "maxFileSize"
+        // ) {
+        //   result = resumeResult;
+        // }
+      
     }
+
     let updatedData = await user.findByIdAndUpdate(
       { _id: id, isDeleted: false },
       payload,
@@ -483,11 +468,43 @@ exports.updateUser = async (id, payload, req) => {
   }
 };
 
+// exports.updateUser = async (id, payload, req) => {
+//   const checkUserExists = await user.findOne({ _id: id, isDeleted: false });
+//   if (!checkUserExists) {
+//     return "noDataExist";
+//   } else {
+//     if (req.files) {
+//       const fileData = await fileUpload(req.files.profileImage, "users");
+//       if (fileData) {
+//         if (fileData == "invalidFileType" || fileData == "maxFileSize") {
+//           result = fileData;
+//         } else {
+//           payload.profileImage = fileData;
+//         }
+//       }
+//     }
+//     let updatedData = await user.findByIdAndUpdate(
+//       { _id: id, isDeleted: false },
+//       payload,
+//       { new: true }
+//     );
+//     return updatedData;
+//   }
+// };
+
 exports.getUserRecord = async (payload) => {
   let result;
-  const data = await user.find({ isDeleted: false });
+  const page = Number(payload.page);
+  const limit = Number(payload.limit || 2);
+  const skip = (page - 1) * limit;
+  console.log("skip", skip);
 
-  if (!data) {
+  const data = await user.aggregate([
+    { $match: { isDeleted: false } },
+    { $skip: skip },
+    { $limit: limit },
+  ]);
+  if (data.length === 0) {
     return "noDataExist";
   } else {
     result = data;
@@ -496,7 +513,6 @@ exports.getUserRecord = async (payload) => {
 };
 
 exports.getUserDetails = async (id) => {
-
   const data = await user.findById({ _id: id, isDeleted: false });
   if (!data) {
     return "noDataExist";

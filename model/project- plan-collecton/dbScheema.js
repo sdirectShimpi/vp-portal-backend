@@ -34,6 +34,14 @@ type: mongoose.Schema.Types.ObjectId,
 ref: "user"
 },
 
+projectId:{
+type: mongoose.Schema.Types.ObjectId,
+ref: "project"
+
+},
+
+
+
 isDeleted: { 
         type: Boolean,
         default: false

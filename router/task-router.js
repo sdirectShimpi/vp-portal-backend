@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post("/addmyTask",  taskController.addmyTask);
 
-router.get("/getmyTasks",  taskController.getmyTasks);
+router.get("/getmyTasks/:id",  taskController.getmyTasks);
 
 router.get("/getmyTaskDetails/:id",  taskController.getmyTaskDetails);
 

@@ -5,7 +5,7 @@ const { faildAction,successAction } = require("../utilites/response");
  const addmyTask = async (req, res) => {
     let result;
     try {
-        result = await taskService.AddmyTask(req.body);
+        result = await taskService.AddmyTask(req.body ,req.params);
         return res
         .status(statusCode.create)
         .json(successAction(result, message.dataAdded));
@@ -18,14 +18,11 @@ const { faildAction,successAction } = require("../utilites/response");
     }
 };
 
-const getmyTasks = async (req, res) => {
-    console.log("res",res)
-
-    
+const getmyTasks = async (req, res) => {  
     let result;
     try {
       
-        result = await taskService.GetmyTask(req.body);
+        result = await taskService.GetmyTask(req.params);
         if(result === 'noDataExist') {
             return res.status(statusCode.notfound).json(faildAction(statusCode.notfound, result, message.dataNotFound("myTask")));
         } else {

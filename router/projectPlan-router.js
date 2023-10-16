@@ -5,7 +5,7 @@ const ValidationMiddleware = require('../validater')
 
 
 
-router.post('/addProjectPlan', (req, res, next)=> ValidationMiddleware(req, res, next, 'addProjectPlan'),          projectPlanController.AddprojectPlan)
+router.post('/addProjectPlan',   projectPlanController.AddprojectPlan)
 router.get('/getProjectPlan',projectPlanController.GetProductPlanData)
 router.get('/getProjectPlanId/:id', projectPlanController.GetProjectPlanById)
 router.delete('/deleteRecord/:id',projectPlanController.DeleateProjectPlanRecord)

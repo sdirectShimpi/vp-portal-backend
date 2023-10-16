@@ -1,6 +1,21 @@
 const projectPlan = require('../model/project- plan-collecton')
 const { fileUpload } = require("../utilites/universal");
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 exports.addProjectPlan = async(payload,req) =>{
 
     if (req.files.doc) {
@@ -19,6 +34,13 @@ exports.addProjectPlan = async(payload,req) =>{
 const addData = await new projectPlan(payload)
 return addData.save()
 }
+
+
+
+
+
+
+
 
 
 

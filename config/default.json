@@ -2,8 +2,8 @@
 
     "app": {
         "name": "5sep-Backend",
-        "host":"http://localhost:3030",
-        "port": 3030,
+        "host":"http://localhost:3010",
+        "port": 3010,
         "jwtAlgo": "HS512",
         "jwtKey": "5sepPBackend"
        
