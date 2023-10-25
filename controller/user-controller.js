@@ -30,6 +30,7 @@ const AddUser = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
+  
   let result;
   try {
     result = await userServices.ChangePassword(req.body);

@@ -89,13 +89,19 @@ exports.addUser = async (payload) => {
   }
 };
 
+
+
+
+
+
+
 exports.GetUserType = async () => {
   try {
     const data = await user.find({
       $or: [{ userType: 3 }, { userType: 4 }, { userType: 5 }],
       isDeleted: false,
     });
-    console.log(data);
+   
 
     if (!data || data.length === 0) {
       return "noDataExit";
@@ -130,17 +136,27 @@ exports.GetUserType = async () => {
 
 // }
 
+    // const checkUser = await user.findOne({
+    //   $and: [{ _id: payload._id }, { password: payload.password }],
+    // });
+
+    // if (!checkUser) {
+    //   return "Invalid Id or Password";
+    // }
+
 exports.ChangePassword = async (payload, newPassword) => {
+
   try {
-    const checkUser = await user.findOne({ email: payload.email });
-    console.log("cheeckUser", checkUser);
-    const isPasswordValid = Bcrypt.compareSync(
+    const checkUser = await user.findOne({ id: payload._id });
+
+
+    const isPasswordValid = await Bcrypt.compare(
       payload.password,
       checkUser.password
     );
-    console.log("isPasswordValid", isPasswordValid);
+    
     if (!isPasswordValid) {
-      return "Invalid Email or Password";
+      return "Invalid id or Password";
     }
 
     if (checkUser) {
@@ -159,11 +175,16 @@ exports.ChangePassword = async (payload, newPassword) => {
   }
 };
 
+
+
+
+
+
 const generateOTP = () => {
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
   const currentTime = new Date();
   const otpExpiry = new Date(currentTime.getTime() + 30000);
-  console.log("otp expiry time ", otpExpiry);
+ 
   return {
     otp: otp,
     otpExpiry: otpExpiry,
@@ -193,7 +214,7 @@ exports.loginUserWithUsernameAndPassword = async (payload) => {
     if (!isPasswordValid) {
       return "invalidCredentials";
     }
-    console.log("id", userLogin._id);
+   
 
     const id = userLogin._id;
 
@@ -288,7 +309,7 @@ const generateNewPassword = () => {
 exports.resetPassword = async (payload) => {
   try {
     const newPasswordObject = generateNewPassword();
-    console.log("newPasswordObject", newPasswordObject);
+   
     const salt = Bcrypt.genSaltSync(12);
     const hashedPassword = Bcrypt.hashSync(newPasswordObject, salt);
 
@@ -301,8 +322,7 @@ exports.resetPassword = async (payload) => {
       { password: hashedPassword },
       { new: true }
     );
-    console.log("resetPassword", resetPassword);
-    if (!resetPassword) {
+       if (!resetPassword) {
       return "User not found ";
     }
     await resetPassword.save();
@@ -336,7 +356,7 @@ exports.resetPassword = async (payload) => {
 };
 
 exports.contentSend = async (payload, _id) => {
-  console.log("payload", payload);
+ 
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -366,7 +386,7 @@ exports.contentSend = async (payload, _id) => {
       },
       { $unwind: "$user" },
     ]);
-    console.log("Aggregation Result:", data);
+   
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending email:", error);
@@ -391,14 +411,12 @@ exports.search = async (payload) => {
   }
 };
 exports.verifyOtp = async (payload) => {
-  console.log("payload", payload.otp);
-
+ 
   try {
     const userData = await user.findOne({
       email: payload.email,
       isDeleted: false,
     });
-    console.log("expiry time from databse", userData.otpExpiry);
     if (!userData) {
       return "userNotFound";
     }
@@ -424,7 +442,6 @@ exports.verifyOtp = async (payload) => {
 
 exports.updateUser = async (id, payload, req) => {
 
-  console.log("id",id)
 
   const checkUserExists = await user.findOne({ _id: id, isDeleted: false });
   if (!checkUserExists) {
@@ -439,7 +456,7 @@ exports.updateUser = async (id, payload, req) => {
           payload.profileImage = fileData;
         }
       }
-      const resumeResult = await addResume(id ,req);
+      const resumeResult = await addResume(id, req);
 
       // if (req.files.resume) {
       //   const resumePayload = {
@@ -447,16 +464,12 @@ exports.updateUser = async (id, payload, req) => {
       //     fileData: req.ResumeDoc.data,
       //   };
 
-
-
-       
-        // if (
-        //   resumeResult === "invalidFileType" ||
-        //   resumeResult === "maxFileSize"
-        // ) {
-        //   result = resumeResult;
-        // }
-      
+      // if (
+      //   resumeResult === "invalidFileType" ||
+      //   resumeResult === "maxFileSize"
+      // ) {
+      //   result = resumeResult;
+      // }
     }
 
     let updatedData = await user.findByIdAndUpdate(
@@ -497,7 +510,7 @@ exports.getUserRecord = async (payload) => {
   const page = Number(payload.page);
   const limit = Number(payload.limit || 2);
   const skip = (page - 1) * limit;
-  console.log("skip", skip);
+  
 
   const data = await user.aggregate([
     { $match: { isDeleted: false } },

@@ -26,6 +26,7 @@ const RoleRouter = require("./router/role.router");
 const leaveRole = require("./router/leave-router");
 const taskRole = require("./router/task-router");
 const roomRouter = require("./router/room-router")
+const DSRRouter = require("./router/dsr-router")
 const cors = require("cors");
 
 const server = http.createServer(app);
@@ -89,6 +90,7 @@ try {
   app.use("/api/v1", RoleRouter);
   app.use("/api/v1", taskRole);
   app.use("/api/v1", roomRouter);
+  app.use('/api/v1',DSRRouter)
 
 
   server.listen(port, () => {

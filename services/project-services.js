@@ -6,7 +6,6 @@ const { fileUpload } = require("../utilites/universal");
 
 exports.addProjectData = async (payload, req) => {
   try {
-   
     const projectData = new project(payload);
     const newProject = await projectData.save();
 
@@ -32,63 +31,89 @@ exports.addProjectData = async (payload, req) => {
   }
 };
 
-
-
-// exports.addProjectData = async (payload) => {
-
-//      const projectData = new project(payload);
-//     let newData = await projectData.save();
-//     return newData
-// }
-
-// exports.addProjectData = async (payload, record,  req) => {
+// exports.getData = async (payload) => {
 //   try {
-//     const projectData = new project(payload);
-//     let newData = await projectData.save();
+//     const page = Number(payload.page);
+//     const limit = Number(payload.limit);
+//     const skip = (page - 1) * limit;
 
-// if(newData){
+//     const dataPipeline = [
+//       // { $match: { isDeleted: false } },
+//       { $skip: skip },
+//       { $limit: limit },
+//     ];
 
-//     if (req.files) {
-//       const fileData = await fileUpload(req.files.projectDocument, "doc");
+//     const data = await project.aggregate(dataPipeline);
 
-//       if (fileData === "invalidFileType" || fileData === "maxFileSize") {
-//         return fileData;
-//       }
+//     const countPipeline = [
+//       // { $match: { isDeleted: false } },
+//       { $count: "count" },
+//     ];
 
-//       record.projectDocument = fileData;
+//     const countData = await project.aggregate(countPipeline);
+
+//     if (!data) {
+//       return "noDataExist";
+//     } else {
+//       return { data, count: countData[0] ? countData[0].count : 0 };
 //     }
-
-//   }
-//    const Data = {projectId:newData_id}
-//    const projectPlanData = new projectPlan(record);
-//   const savedProjectPlanData = await projectPlanData.save();
-//   return savedProjectPlanData;
 //   } catch (error) {
 //     console.error(error);
 //     throw error;
 //   }
 // };
 
-// exports.addProjectData = async (payload) => {
-//   const addData = await new project(payload);
-//   const   projectData = addData
-// if (req.files.doc) {
+// exports.getData = async (payload) => {
+//   try {
+//     console.log("payload", payload);
+//     const page = Number(payload.page);
+//     const limit = Number(payload.limit);
+//     const skip = (page - 1) * limit;
 
-//   const fileData = await fileUpload(req.files.doc, "doc");
-//     if (fileData) {
-//     if (fileData == "invalidFileType" || fileData == "maxFileSize") {
-//       result = fileData;
-//     } else {
+//     let queryObject = {};
 
-//       payload.projectData = fileData;
+//     if (payload.projectName) {
+//       let searchKeyWord;
+//       if (payload.projectName) {
+//         searchKeyWord = payload.projectName;
+//         queryObject.projectName = {
+//           $regex: new RegExp(searchKeyWord, "i"),
+//         };
+//       } else {
+//         //  searchKeyWorddelete
+//         delete queryObject.projectName;
+//       }
+//       // console.log('searchKeyWord',searchKeyWord)
+//       // queryObject.projectName = {
+//       //   $regex: new RegExp(searchKeyWord, "i"),
+//       // };
 //     }
+
+//     if (payload.isDeleted !== undefined) {
+//       queryObject.isDeleted = payload.isDeleted === "true" ? true : false;
+//     }
+//     console.log("queryObject", queryObject);
+//     const dataPipeline = [
+//       { $match: queryObject },
+//       { $skip: skip },
+//       { $limit: limit },
+//     ];
+
+//     const data = await project.aggregate(dataPipeline);
+
+//     const countPipeline = [{ $match: queryObject }, { $count: "count" }];
+
+//     const countData = await project.aggregate(countPipeline);
+
+//     if (!data) {
+//       return "noDataExist";
+//     } else {
+//       return { data, count: countData[0] ? countData[0].count : 0 };
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     throw error;
 //   }
-//   const addData = await new projectPlan(payload)
-//   return addData.save()
-
-// }
-
-//   return projectData.save();
 // };
 
 exports.getData = async (payload) => {
@@ -96,23 +121,44 @@ exports.getData = async (payload) => {
     const page = Number(payload.page);
     const limit = Number(payload.limit);
     const skip = (page - 1) * limit;
-    console.log("skip", skip);
+
+    let queryObject = {};
+
+    if (payload.projectName && payload.projectName !== "undefined") {
+      console.log(payload.projectName, "<<<payload.projectName");
+      queryObject.projectName = {
+        $regex: new RegExp(payload.projectName, "i"),
+      };
+    }
+
+    // if (payload.createdAt) {
+    //   queryObject.createdAt = {
+    //     $sort: payload.createdAt === -1,
+    //   };
+    // }
+
+    if (payload.isDeleted !== "undefined") {
+      if (payload.isDeleted === "all") {
+        queryObject.isDeleted = { $in: [true, false] };
+      } else if (payload.isDeleted === "true") {
+        queryObject.isDeleted = true;
+      } else {
+        queryObject.isDeleted = false;
+      }
+    }
 
     const dataPipeline = [
-      { $match: { isDeleted: false } },
+      { $match: queryObject },
+      { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
     ];
-
+    console.log(dataPipeline, "<<<<>>>>");
     const data = await project.aggregate(dataPipeline);
-
-    const countPipeline = [
-      { $match: { isDeleted: false } },
-      { $count: "count" },
-    ];
+    console.log(data, "<<<<data>>>>");
+    const countPipeline = [{ $match: queryObject }, { $count: "count" }];
 
     const countData = await project.aggregate(countPipeline);
-    console.log("counr", countData);
 
     if (!data) {
       return "noDataExist";
@@ -122,6 +168,79 @@ exports.getData = async (payload) => {
   } catch (error) {
     console.error(error);
     throw error;
+  }
+};
+
+// exports.getData = async (payload) => {
+//   try {
+//     console.log("payload", payload);
+//     const page = Number(payload.page);
+//     const limit = Number(payload.limit);
+//     const skip = (page - 1) * limit;
+
+//     let queryObject = {};
+
+//     if (payload.projectName) {
+//       // If projectName is defined in the payload, add it to the query object
+//       queryObject.projectName = {
+//         $regex: new RegExp(payload.projectName, "i"),
+//       };
+//     }
+
+//     if (payload.isDeleted !== undefined) {
+//       queryObject.isDeleted = payload.isDeleted === "true" ? true : false;
+//     }
+
+//     console.log("queryObject", queryObject);
+
+//     const dataPipeline = [
+//       { $match: queryObject },
+//       { $skip: skip },
+//       { $limit: limit },
+//     ];
+
+//     const data = await project.aggregate(dataPipeline);
+
+//     const countPipeline = [{ $match: queryObject }, { $count: "count" }];
+
+//     const countData = await project.aggregate(countPipeline);
+
+//     if (!data) {
+//       return "noDataExist";
+//     } else {
+//       return { data, count: countData[0] ? countData[0].count : 0 };
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     throw error;
+//   }
+// };
+
+// if (payload.createdAt) {
+//   queryObject.createdAt = {
+//     $sort: payload.createdAt === "asc" ? 1 : -1,
+//   };
+// }
+
+exports.search = async (payload) => {
+  let queryObject = {};
+
+  try {
+    if (payload.projectName) {
+      queryObject.projectName = {
+        $regex: new RegExp(payload.projectName, "i"),
+      };
+    }
+
+    if (payload.isDeleted !== undefined) {
+      queryObject.isDeleted = payload.isDeleted;
+    }
+
+    const result = await project.find(queryObject);
+
+    return result;
+  } catch (err) {
+    console.log(err);
   }
 };
 
@@ -213,11 +332,10 @@ exports.getData = async (payload) => {
 exports.getRecordUsingId = async (payload) => {
   try {
     const id = payload.id;
-    console.log("id", id);
+
     const page = Number(payload.page || 1);
     const limit = Number(payload.limit || 2);
     const skip = (page - 1) * limit;
-    console.log("skip", skip);
 
     const countPipeline = [
       { $match: { isDeleted: false } },
@@ -293,6 +411,7 @@ exports.upadatData = async (id, payload) => {
 
 exports.deleteData = async (id) => {
   const findData = await project.findOne({ _id: id, isDeleted: false });
+
   if (!findData) {
     return "noDataExist";
   } else {
@@ -301,6 +420,36 @@ exports.deleteData = async (id) => {
       { $set: { isDeleted: true } },
       { new: true }
     );
+
     return deleteData;
   }
 };
+
+// exports.search = async (payload) => {
+//   try {
+
+//     const result = await project.find({
+//       projectName: { $regex: new RegExp(payload.projectName, "i") },
+//     });
+//     return result;
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+// exports.search = async (req, res) => {
+//   try {
+//     const { product_name } = req.query;
+//     console.log('product_name', product_name);
+
+//     // Use Mongoose to find records that match the product_name
+//     const result = await ProductRecord.find({
+//       product_name: { $regex: new RegExp(product_name, 'i') },
+//     });
+
+//     res.json(result);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ error: 'An error occurred' });
+//   }
+// };

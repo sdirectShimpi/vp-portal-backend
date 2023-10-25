@@ -10,6 +10,8 @@ router.get('/getRecordById', projectController.GetRecordById)
 router.get('/getPorjectRecord/:id',projectController.GetProjectDetails)
 router.delete('/deteteRecord/:id',projectController.DeleateRecord)
 router.post('/updatedata/:id',projectController.UptadteData)
+router.patch('/updateStatus' , projectController.updateStatus)
+router.get('/searchRecord' , projectController.searchUser)
 
 
 module.exports = router

@@ -1,6 +1,7 @@
 const projectServices = require("../services/project-services");
 const { statusCode, message } = require("../utilites/message");
 const { successAction, faildAction } = require("../utilites/response");
+const project = require('../model/project-collection')
 
 const AddprojectData = async (req, res) => {
   let result;
@@ -112,6 +113,7 @@ const GetProjectDetails = async (req, res) => {
 };
 
 const DeleateRecord = async (req, res) => {
+  
   let result;
   try {
     result = await projectServices.deleteData(req.params.id);
@@ -133,6 +135,7 @@ const DeleateRecord = async (req, res) => {
 };
 
 const UptadteData = async (req, res) => {
+  
   let result;
   try {
     result = await projectServices.upadatData(req.params.id, req.body);
@@ -154,7 +157,57 @@ const UptadteData = async (req, res) => {
   }
 };
 
+
+const updateStatus = async (req, res) => {
+  const { isDeleted, _id } = req.body
+
+  try {
+      if (isDeleted === "activate") {
+          const project = await project.findByIdAndUpdate(_id, { isDeleted: true })
+          return res.status(200).json({ success: true, msg: "Project Aviailable", project: project })
+      }
+      else {
+          const project = await project.findByIdAndUpdate(_id, { isDeleted: false })
+          return res.status(200).json({ success: true, msg: "Project Deleated", project: project })
+      }
+  } catch (error) {
+      return res.status(500).json({ success: false, msg: "Internal Server Error", error })
+  }
+}
+
+
+
+const searchUser = async (req, res) => {
+  let result;
+  try {
+    result = await projectServices.search(req.query);
+
+    return res
+      .status(statusCode.success)
+      .json(successAction(result, message.search));
+  } catch (error) {
+    console.log(error);
+
+    return res
+      .status(statusCode.serverError)
+      .json(faildAction(statusCode.serverError, result, error.mesage));
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
+  searchUser,
   getUserData,
   GetRecordById,
   AddprojectData,
@@ -162,4 +215,5 @@ module.exports = {
   GetProjectDetails,
   DeleateRecord,
   UptadteData,
+  updateStatus
 };

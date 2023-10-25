@@ -21,7 +21,7 @@ router.get('/getUser/:id',userController.GetRecordDetails)
 router.delete('/deletUserRecord/:id', checkToken, userController.DeleteUserDetials)
 router.put('/updateUser/:id', userController.UpdateUser)
 router.post('/verfyOtp', checkToken,userController.VerifyOtp)
-router.post('/changePassword', (req, res, next) =>  ValidationMiddleware(req, res, next, 'changePassword'), userController.changePassword)
+router.post('/changePassword',  userController.changePassword)
 router.post('/resetPassword',  (req, res, next) => ValidationMiddleware(req, res, next, 'resetPassword'),  userController.ResetPassword)
 
 module.exports = router
